@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-const uri =
-  "mongodb+srv://admin:admin@cluster0.0tnle.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = process.env.DB_URI;
 
 //function that takes uri for mongoose connection
 const InitiateMongoServer = async () => {
