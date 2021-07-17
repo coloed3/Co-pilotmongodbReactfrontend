@@ -1,0 +1,89 @@
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const morgan = require("morgan");
+const PORT = process.env.PORT || 3000;
+const mongoose = require("mongoose");
+const InitiateMongoServer = require("./config/db");
+require("dotenv").config();
+const User = require("./models/user");
+const Login = require("./models/login");
+
+//InitiateMongoServer to server
+InitiateMongoServer();
+
+//create user collection
+User.createCollection();
+//create Login Collection
+Login.createCollection();
+
+//middleware for express json
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+app.use(cors());
+app.use(morgan("dev"));
+
+//create endpoint to get back user from mongoose
+app.get("/user/:username", function (req, res) {
+  User.findOne({ username: req.params.username }, function (err, user) {
+    if (err) {
+      res.send(err);
+    }
+    res.send(user);
+  });
+});
+
+//create endpoint to get back all users from mongoose
+app.get("/users", function (req, res) {
+  User.find({}, function (err, users) {
+    if (err) {
+      res.send(err);
+    }
+    res.send(users);
+  });
+});
+
+//create endpoint to delete user by id in mongoose
+app.delete("/user/:username", function (req, res) {
+  User.remove({ username: req.params.username }, function (err, user) {
+    if (err) {
+      res.send(err);
+    }
+    res.send(user);
+  });
+});
+
+//create endpoint to update user by id in mongoose
+app.put("/user/:username", function (req, res) {
+  User.findOneAndUpdate(
+    { username: req.params.username },
+    req.body,
+    { new: true },
+    function (err, user) {
+      if (err) {
+        res.send(err);
+      }
+      res.send(user);
+    }
+  );
+});
+
+//create endpoint to insert user in mongoose
+app.post("/user", function (req, res) {
+  const newUser = new User(req.body);
+  newUser.save(function (err, user) {
+    if (err) {
+      res.send(err);
+    }
+    res.send(user);
+  });
+});
+
+//start express server
+app.listen(PORT, function () {
+  console.log("Server running on port " + PORT);
+});
